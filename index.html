@@ -41,7 +41,7 @@ button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default}.
     <div class="amount-entry"><span class="dollar">$</span><input id="amount" class="amount-input" inputmode="decimal" placeholder="0.00"></div>
     <input id="description" class="text-input" placeholder="What was it for?">
     <div class="mini-label">Category</div><div id="chips" class="chips"></div>
-    <div class="date-head"><span class="mini-label" style="margin:0">Date</span><button id="todayBtn" class="today">Today</button></div>
+    <div class="date-head"><span class="mini-label" style="margin:0">Date</span><button id="todayBtn" class="today">Today</button></div><div id="selectedDateText" style="text-align:center;color:var(--sub);font-size:13px;margin:-2px 0 8px"></div>
     <div id="wheels" class="wheels"></div>
     <button id="save" class="save" disabled>Add expense</button>
     <button id="delete" class="delete" style="display:none">Delete expense</button>
@@ -55,18 +55,20 @@ const CATEGORIES=[
 {name:"Eating Out",color:"#F6B26B",icon:"🍴"},{name:"Bills",color:"#B4A7D6",icon:"🧾"},
 {name:"Rent/Mortgage",color:"#C27BA0",icon:"⌂"},{name:"Shopping",color:"#E8C84A",icon:"🛍️"},
 {name:"Health",color:"#E06666",icon:"♥"},{name:"Entertainment",color:"#76A5AF",icon:"🎬"},
-{name:"Travel",color:"#6AA84F",icon:"✈️"},{name:"Other",color:"#A6A6A6",icon:"•••"}];
+{name:"Travel",color:"#6AA84F",icon:"✈️"},{name:"Drinks",color:"#8E7CC3",icon:"🥤"},{name:"Snacks",color:"#F1C232",icon:"🍿"},{name:"Other",color:"#A6A6A6",icon:"•••"}];
 const catByName=Object.fromEntries(CATEGORIES.map(c=>[c.name,c]));
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const seed=()=>{const d=new Date(),mk=(offset,category,description,amount)=>{const x=new Date(d);x.setDate(x.getDate()-offset);return{id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),date:`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`,category,description,amount}};return[mk(0,"Eating Out","Coffee with Sam",6.5),mk(1,"Transport","Petrol",45),mk(2,"Groceries","Coles weekly shop",84.5),mk(6,"Bills","Phone bill",55),mk(9,"Shopping","New sneakers",129)]};
 const fmt=n=>n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const weekStart=d=>{const x=new Date(d),day=x.getDay(),diff=(day===0?-6:1)-day;x.setDate(x.getDate()+diff);x.setHours(0,0,0,0);return x.getTime()};
 const dayLabel=s=>{const d=new Date(s+"T00:00:00"),n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate()),diff=Math.round((t-d)/86400000);if(diff===0)return"Today";if(diff===1)return"Yesterday";return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})};
-let transactions=JSON.parse(localStorage.getItem("expenses")||"null");if(!transactions){transactions=seed();localStorage.setItem("expenses",JSON.stringify(transactions))}
+let transactions;
+try { transactions=JSON.parse(localStorage.getItem("expenses")||"null"); } catch(e) { transactions=null; }
+if(!Array.isArray(transactions)){transactions=seed();saveData();}
+function saveData(){localStorage.setItem("expenses",JSON.stringify(transactions))}
 let period="month",editing=null,chart=null,dateVal={};const $=id=>document.getElementById(id);
 $("todayText").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
 
-function saveData(){localStorage.setItem("expenses",JSON.stringify(transactions))}
 function render(){
  const now=new Date(),ws=weekStart(now);
  const filtered=transactions.filter(t=>{const d=new Date(t.date+"T00:00:00");return period==="week"?weekStart(d)===ws:d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()});
@@ -91,21 +93,47 @@ function renderList(filtered){
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 
 function initDate(d=new Date()){dateVal={year:d.getFullYear(),month:d.getMonth(),day:d.getDate()}}
-function makeWheel(type,items,value){
- const wrap=document.createElement("div");wrap.className="wheel "+type;const sc=document.createElement("div");sc.className="wheel-scroll";const pad1=document.createElement("div");pad1.className="wheel-pad";sc.appendChild(pad1);
+function makeWheel(type,items,value,onPick){
+ const wrap=document.createElement("div");wrap.className="wheel "+type;
+ const sc=document.createElement("div");sc.className="wheel-scroll";
+ const pad=document.createElement("div");pad.className="wheel-pad";sc.appendChild(pad);
  items.forEach(it=>{const row=document.createElement("div");row.className="wheel-item";row.textContent=it.label;row.dataset.value=it.value;sc.appendChild(row)});
- sc.appendChild(pad1.cloneNode());wrap.appendChild(sc);const line=document.createElement("div");line.className="wheel-line";wrap.appendChild(line);
- sc.scrollTop=items.findIndex(x=>x.value===value)*36;
- let timer;sc.addEventListener("scroll",()=>{clearTimeout(timer);timer=setTimeout(()=>{let i=Math.max(0,Math.min(items.length-1,Math.round(sc.scrollTop/36)));sc.scrollTop=i*36;return i},80);});sc.addEventListener("scrollend",()=>{});
+ sc.appendChild(pad.cloneNode());wrap.appendChild(sc);
+ const line=document.createElement("div");line.className="wheel-line";wrap.appendChild(line);
+ const idx=Math.max(0,items.findIndex(x=>x.value===value));
+ requestAnimationFrame(()=>{sc.scrollTop=idx*36; updateWheelVisual(sc);});
+ let timer;
+ sc.addEventListener("scroll",()=>{
+   updateWheelVisual(sc);
+   clearTimeout(timer);
+   timer=setTimeout(()=>{
+     const i=Math.max(0,Math.min(items.length-1,Math.round(sc.scrollTop/36)));
+     sc.scrollTo({top:i*36,behavior:"smooth"});
+     onPick(items[i].value);
+   },100);
+ });
  wrap._sc=sc;wrap._items=items;return wrap;
 }
+function updateWheelVisual(sc){
+ const center=sc.scrollTop/36;
+ [...sc.querySelectorAll(".wheel-item")].forEach((el,i)=>{
+   const dist=Math.abs(i-center);el.style.opacity=Math.max(.2,1-dist*.38);el.style.transform=`scale(${Math.max(.78,1-dist*.14)})`;el.style.fontWeight=dist<.3?600:400;
+ });
+}
+function renderSelectedDate(){ const d=new Date(dateVal.year,dateVal.month,dateVal.day); $("selectedDateText").textContent=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
 function renderWheels(){
+ renderSelectedDate();
  const container=$("wheels");container.innerHTML="";
  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((label,value)=>({label,value}));
  const days=Array.from({length:new Date(dateVal.year,dateVal.month+1,0).getDate()},(_,i)=>({label:String(i+1),value:i+1}));
- const years=Array.from({length:7},(_,i)=>new Date().getFullYear()-3+i).map(y=>({label:String(y),value:y}));
- const specs=[["month",months,dateVal.month],["day",days,dateVal.day],["year",years,dateVal.year]];
- specs.forEach(([type,items,val])=>{const w=makeWheel(type,items,val);w._sc.addEventListener("scroll",()=>{clearTimeout(w._timer);w._timer=setTimeout(()=>{const i=Math.max(0,Math.min(items.length-1,Math.round(w._sc.scrollTop/36)));const v=items[i].value;if(type==="month"){dateVal.month=v;dateVal.day=Math.min(dateVal.day,new Date(dateVal.year,v+1,0).getDate());}else if(type==="day")dateVal.day=v;else{dateVal.year=v;dateVal.day=Math.min(dateVal.day,new Date(v,dateVal.month+1,0).getDate())}renderWheels()},120)});container.appendChild(w)});
+ const years=Array.from({length:11},(_,i)=>new Date().getFullYear()-5+i).map(y=>({label:String(y),value:y}));
+ const set=(type,v)=>{
+   if(type==="month"){dateVal.month=v;dateVal.day=Math.min(dateVal.day,new Date(dateVal.year,v+1,0).getDate());}
+   else if(type==="day") dateVal.day=v;
+   else {dateVal.year=v;dateVal.day=Math.min(dateVal.day,new Date(v,dateVal.month+1,0).getDate());}
+   renderWheels();
+ };
+ [["month",months,dateVal.month], ["day",days,dateVal.day], ["year",years,dateVal.year]].forEach(([type,items,val])=>container.appendChild(makeWheel(type,items,val,v=>set(type,v))));
 }
 function openSheet(tx=null){
  editing=tx||null;initDate();
