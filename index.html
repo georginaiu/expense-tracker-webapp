@@ -93,47 +93,59 @@ function renderList(filtered){
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 
 function initDate(d=new Date()){dateVal={year:d.getFullYear(),month:d.getMonth(),day:d.getDate()}}
-function makeWheel(type,items,value,onPick){
- const wrap=document.createElement("div");wrap.className="wheel "+type;
- const sc=document.createElement("div");sc.className="wheel-scroll";
- const pad=document.createElement("div");pad.className="wheel-pad";sc.appendChild(pad);
- items.forEach(it=>{const row=document.createElement("div");row.className="wheel-item";row.textContent=it.label;row.dataset.value=it.value;sc.appendChild(row)});
- sc.appendChild(pad.cloneNode());wrap.appendChild(sc);
- const line=document.createElement("div");line.className="wheel-line";wrap.appendChild(line);
- const idx=Math.max(0,items.findIndex(x=>x.value===value));
- requestAnimationFrame(()=>{sc.scrollTop=idx*36; updateWheelVisual(sc);});
- let timer;
- sc.addEventListener("scroll",()=>{
-   updateWheelVisual(sc);
-   clearTimeout(timer);
-   timer=setTimeout(()=>{
-     const i=Math.max(0,Math.min(items.length-1,Math.round(sc.scrollTop/36)));
-     sc.scrollTo({top:i*36,behavior:"smooth"});
-     onPick(items[i].value);
-   },100);
- });
- wrap._sc=sc;wrap._items=items;return wrap;
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
+function updateSelectedDate(){
+ const d=new Date(dateVal.year,dateVal.month,dateVal.day);
+ $("selectedDateText").textContent=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+ const t=new Date(); const isToday=dateVal.year===t.getFullYear()&&dateVal.month===t.getMonth()&&dateVal.day===t.getDate();
+ $("todayBtn").textContent=isToday?"Today · "+t.toLocaleDateString(undefined,{day:"numeric",month:"short"}):"Today";
 }
+let wheelState={};
 function updateWheelVisual(sc){
  const center=sc.scrollTop/36;
  [...sc.querySelectorAll(".wheel-item")].forEach((el,i)=>{
-   const dist=Math.abs(i-center);el.style.opacity=Math.max(.2,1-dist*.38);el.style.transform=`scale(${Math.max(.78,1-dist*.14)})`;el.style.fontWeight=dist<.3?600:400;
+  const dist=Math.abs(i-center); el.style.opacity=Math.max(.2,1-dist*.38); el.style.transform=`scale(${Math.max(.80,1-dist*.14)})`; el.style.fontWeight=dist<.35?600:400;
  });
 }
-function renderSelectedDate(){ const d=new Date(dateVal.year,dateVal.month,dateVal.day); $("selectedDateText").textContent=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}); }
+function buildWheel(type,items,value){
+ const wrap=document.createElement("div");wrap.className="wheel "+type;
+ const sc=document.createElement("div");sc.className="wheel-scroll";
+ const pad=document.createElement("div");pad.className="wheel-pad";sc.appendChild(pad);
+ items.forEach((it,i)=>{const row=document.createElement("div");row.className="wheel-item";row.textContent=it.label;row.dataset.value=it.value;row.addEventListener("click",()=>snapWheel(type,i));sc.appendChild(row)});
+ sc.appendChild(pad.cloneNode());wrap.appendChild(sc);
+ const line=document.createElement("div");line.className="wheel-line";wrap.appendChild(line);
+ wheelState[type]={sc,items,index:Math.max(0,items.findIndex(x=>x.value===value)),timer:null};
+ requestAnimationFrame(()=>{sc.scrollTop=wheelState[type].index*36;updateWheelVisual(sc)});
+ sc.addEventListener("scroll",()=>{
+  updateWheelVisual(sc); const st=wheelState[type]; clearTimeout(st.timer);
+  st.timer=setTimeout(()=>{const i=Math.max(0,Math.min(st.items.length-1,Math.round(sc.scrollTop/36)));snapWheel(type,i,true)},100);
+ },{passive:true});
+ return wrap;
+}
+function snapWheel(type,index,animated=false){
+ const st=wheelState[type];if(!st)return; index=Math.max(0,Math.min(st.items.length-1,index));st.index=index;
+ st.sc.scrollTo({top:index*36,behavior:animated?"smooth":"auto"}); updateWheelVisual(st.sc);
+ clearTimeout(st.timer); st.timer=setTimeout(()=>applyWheel(type,index),animated?220:0);
+}
+function applyWheel(type,index){
+ const st=wheelState[type]; if(!st || st.index!==index)return;
+ const value=st.items[index].value;
+ if(type==="month")dateVal.month=value;
+ else if(type==="day")dateVal.day=value;
+ else dateVal.year=value;
+ dateVal.day=Math.min(dateVal.day,daysInMonth(dateVal.year,dateVal.month));
+ updateSelectedDate();
+ if(type!=="day")renderWheels();
+}
 function renderWheels(){
- renderSelectedDate();
- const container=$("wheels");container.innerHTML="";
+ updateSelectedDate(); const container=$("wheels");container.innerHTML="";wheelState={};
  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((label,value)=>({label,value}));
- const days=Array.from({length:new Date(dateVal.year,dateVal.month+1,0).getDate()},(_,i)=>({label:String(i+1),value:i+1}));
- const years=Array.from({length:11},(_,i)=>new Date().getFullYear()-5+i).map(y=>({label:String(y),value:y}));
- const set=(type,v)=>{
-   if(type==="month"){dateVal.month=v;dateVal.day=Math.min(dateVal.day,new Date(dateVal.year,v+1,0).getDate());}
-   else if(type==="day") dateVal.day=v;
-   else {dateVal.year=v;dateVal.day=Math.min(dateVal.day,new Date(v,dateVal.month+1,0).getDate());}
-   renderWheels();
- };
- [["month",months,dateVal.month], ["day",days,dateVal.day], ["year",years,dateVal.year]].forEach(([type,items,val])=>container.appendChild(makeWheel(type,items,val,v=>set(type,v))));
+ const days=Array.from({length:daysInMonth(dateVal.year,dateVal.month)},(_,i)=>({label:String(i+1),value:i+1}));
+ const cy=new Date().getFullYear(), min=Math.min(cy-10,dateVal.year-2), max=Math.max(cy+10,dateVal.year+2);
+ const years=Array.from({length:max-min+1},(_,i)=>({label:String(min+i),value:min+i}));
+ container.appendChild(buildWheel("month",months,dateVal.month));
+ container.appendChild(buildWheel("day",days,dateVal.day));
+ container.appendChild(buildWheel("year",years,dateVal.year));
 }
 function openSheet(tx=null){
  editing=tx||null;initDate();
