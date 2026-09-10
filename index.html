@@ -135,9 +135,7 @@ function applyWheel(type,index){
  else dateVal.year=value;
  dateVal.day=Math.min(dateVal.day,daysInMonth(dateVal.year,dateVal.month));
  updateSelectedDate();
- if(type==="month"||type==="year"){
-  renderWheels();
- }
+ if(type!=="day")renderWheels();
 }
 function renderWheels(){
  updateSelectedDate(); const container=$("wheels");container.innerHTML="";wheelState={};
