@@ -4,165 +4,2180 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Expenses</title>
+
 <style>
-:root{--bg:#F4F5F1;--card:#fff;--ink:#2B2D28;--sub:#9AA096;--accent:#7FA687;--deep:#5D8566;--line:#EDEEE9;--handle:#D8DAD3}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink)}
-button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default}.app{min-height:100vh;max-width:420px;margin:auto;padding-bottom:100px;position:relative}
-.header{padding:24px 20px 8px}.title{font-size:22px;font-weight:600}.date{font-size:13px;color:var(--sub);margin-top:2px}
-.period-wrap{padding:8px 20px}.period{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}.period button{border:0;background:transparent;border-radius:999px;padding:6px 16px;color:var(--sub);font-size:13px;font-weight:600}.period button.active{background:var(--accent);color:#fff}
-.pad{padding:12px 20px}.card{background:var(--card);border-radius:20px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.total{padding:20px}.label{font-size:12px;color:var(--sub);margin-bottom:4px}.total-num{font-size:34px;font-weight:600}
-.chart-card{padding:18px 18px 16px}.section-label{font-size:13px;color:var(--sub);margin-bottom:4px;font-weight:600}.chart-area{height:180px;position:relative}.chart-area canvas{width:180px!important;height:180px!important;display:block;margin:auto}.chart-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}.chart-center small{font-size:11px;color:var(--sub)}.chart-center strong{font-size:20px}
-.legend{display:flex;flex-direction:column;gap:10px;margin-top:4px}.legend-row{display:flex;align-items:center;font-size:13px}.dot{width:8px;height:8px;border-radius:50%;margin-right:8px;flex:none}.cat-name{flex:1}.pct{color:var(--sub);margin-right:8px}.amount{font-weight:600}
-.list-wrap{padding:4px 20px}.day-group{margin-bottom:14px}.day-label{font-size:12px;color:var(--sub);margin:6px 4px}.tx-card{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}.tx{display:flex;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer}.tx:last-child{border-bottom:0}.icon-box{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-right:12px;flex:none;font-size:17px}.tx-main{flex:1;min-width:0}.desc{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cat{font-size:12px;color:var(--sub)}.tx-amount{font-size:14px;font-weight:600;margin-right:4px}.chev{color:var(--line);font-size:20px}
-.empty{padding:28px 20px;text-align:center;color:var(--sub);font-size:13px}
-.fab{position:fixed;right:max(20px,calc((100vw - 420px)/2 + 20px));bottom:28px;width:56px;height:56px;border:0;border-radius:50%;background:var(--accent);color:#fff;font-size:30px;line-height:1;box-shadow:0 6px 16px rgba(93,133,102,.4);z-index:30}
-.overlay{position:fixed;inset:0;background:rgba(30,32,28,.35);opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}.overlay.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;max-width:420px;margin:auto;background:var(--card);border-radius:24px 24px 0 0;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);z-index:41;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 -8px 30px rgba(0,0,0,.12)}.sheet.open{transform:translateY(0)}.handle{width:36px;height:4px;border-radius:2px;background:var(--handle);margin:10px auto 0}.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 6px;font-size:17px;font-weight:600}.close{width:28px;height:28px;border:0;border-radius:50%;background:var(--bg);color:var(--sub);font-size:18px}.sheet-body{overflow-y:auto;padding:4px 20px 20px}.amount-entry{display:flex;align-items:baseline;justify-content:center;padding:18px 0 8px}.dollar{font-size:30px;color:var(--sub);margin-right:4px}.amount-input{font-size:44px;font-weight:600;color:var(--ink);border:0;outline:0;background:transparent;width:180px}.text-input{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:15px;outline:0;margin-bottom:16px}.mini-label{font-size:12px;color:var(--sub);margin-bottom:8px}.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}.chip{flex:none;display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);white-space:nowrap;font-size:13px}.chip.active{font-weight:600}
-.date-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.today{font-size:12px;color:var(--deep);background:0;border:0}.wheels{display:flex;justify-content:center;gap:4px}.wheel{position:relative;height:180px;overflow:hidden;width:90px}.wheel.day{width:64px}.wheel.year{width:80px}.wheel-scroll{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none}.wheel-scroll::-webkit-scrollbar{display:none}.wheel-pad{height:72px}.wheel-item{height:36px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;font-size:18px;color:var(--ink);transition:.1s}.wheel-line{position:absolute;top:72px;left:0;right:0;height:36px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);pointer-events:none}.save{width:100%;margin-top:20px;padding:14px 0;border:0;border-radius:14px;background:var(--accent);color:#fff;font-size:16px;font-weight:600}.save:disabled{background:var(--line);color:var(--sub)}.delete{width:100%;margin-top:10px;padding:12px 0;border:0;background:transparent;color:#C0504D;font-size:14px;font-weight:600}
-@media(min-width:421px){.fab{right:calc((100vw - 420px)/2 + 20px)}}
+:root{
+  --bg:#F4F5F1;
+  --card:#fff;
+  --ink:#2B2D28;
+  --sub:#9AA096;
+  --accent:#7FA687;
+  --deep:#5D8566;
+  --line:#EDEEE9;
+  --handle:#D8DAD3
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink)
+}
+
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default}
+
+.app{
+  min-height:100vh;
+  max-width:420px;
+  margin:auto;
+  padding-bottom:100px;
+  position:relative
+}
+
+.header{
+  padding:24px 20px 8px
+}
+
+.title{
+  font-size:22px;
+  font-weight:600
+}
+
+.date{
+  font-size:13px;
+  color:var(--sub);
+  margin-top:2px
+}
+
+.period-wrap{
+  padding:8px 20px
+}
+
+.period{
+  display:inline-flex;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:3px
+}
+
+.period button{
+  border:0;
+  background:transparent;
+  border-radius:999px;
+  padding:6px 16px;
+  color:var(--sub);
+  font-size:13px;
+  font-weight:600
+}
+
+.period button.active{
+  background:var(--accent);
+  color:#fff
+}
+
+.pad{
+  padding:12px 20px
+}
+
+.card{
+  background:var(--card);
+  border-radius:20px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04)
+}
+
+.total{
+  padding:20px
+}
+
+.label{
+  font-size:12px;
+  color:var(--sub);
+  margin-bottom:4px
+}
+
+.total-num{
+  font-size:34px;
+  font-weight:600
+}
+
+.chart-card{
+  padding:18px 18px 16px
+}
+
+.section-label{
+  font-size:13px;
+  color:var(--sub);
+  margin-bottom:4px;
+  font-weight:600
+}
+
+.chart-area{
+  height:180px;
+  position:relative
+}
+
+.chart-area canvas{
+  width:180px!important;
+  height:180px!important;
+  display:block;
+  margin:auto
+}
+
+.chart-center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none
+}
+
+.chart-center small{
+  font-size:11px;
+  color:var(--sub)
+}
+
+.chart-center strong{
+  font-size:20px
+}
+
+.legend{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:4px
+}
+
+.legend-row{
+  display:flex;
+  align-items:center;
+  font-size:13px
+}
+
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  margin-right:8px;
+  flex:none
+}
+
+.cat-name{
+  flex:1
+}
+
+.pct{
+  color:var(--sub);
+  margin-right:8px
+}
+
+.amount{
+  font-weight:600
+}
+
+.list-wrap{
+  padding:4px 20px
+}
+
+.day-group{
+  margin-bottom:14px
+}
+
+.day-label{
+  font-size:12px;
+  color:var(--sub);
+  margin:6px 4px
+}
+
+.tx-card{
+  background:var(--card);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.04)
+}
+
+.tx{
+  display:flex;
+  align-items:center;
+  padding:12px 14px;
+  border-bottom:1px solid var(--line);
+  cursor:pointer
+}
+
+.tx:last-child{
+  border-bottom:0
+}
+
+.icon-box{
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-right:12px;
+  flex:none;
+  font-size:17px
+}
+
+.tx-main{
+  flex:1;
+  min-width:0
+}
+
+.desc{
+  font-size:14px;
+  font-weight:500;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+
+.cat{
+  font-size:12px;
+  color:var(--sub)
+}
+
+.tx-amount{
+  font-size:14px;
+  font-weight:600;
+  margin-right:4px
+}
+
+.chev{
+  color:var(--line);
+  font-size:20px
+}
+
+.empty{
+  padding:28px 20px;
+  text-align:center;
+  color:var(--sub);
+  font-size:13px
+}
+
+.fab{
+  position:fixed;
+  right:max(20px,calc((100vw - 420px)/2 + 20px));
+  bottom:28px;
+  width:56px;
+  height:56px;
+  border:0;
+  border-radius:50%;
+  background:var(--accent);
+  color:#fff;
+  font-size:30px;
+  line-height:1;
+  box-shadow:0 6px 16px rgba(93,133,102,.4);
+  z-index:30
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(30,32,28,.35);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s;
+  z-index:40
+}
+
+.overlay.open{
+  opacity:1;
+  pointer-events:auto
+}
+
+.sheet{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  max-width:420px;
+  margin:auto;
+  background:var(--card);
+  border-radius:24px 24px 0 0;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.32,.72,0,1);
+  z-index:41;
+  max-height:82vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 -8px 30px rgba(0,0,0,.12)
+}
+
+.sheet.open{
+  transform:translateY(0)
+}
+
+.handle{
+  width:36px;
+  height:4px;
+  border-radius:2px;
+  background:var(--handle);
+  margin:10px auto 0
+}
+
+.sheet-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 20px 6px;
+  font-size:17px;
+  font-weight:600
+}
+
+.close{
+  width:28px;
+  height:28px;
+  border:0;
+  border-radius:50%;
+  background:var(--bg);
+  color:var(--sub);
+  font-size:18px
+}
+
+.sheet-body{
+  overflow-y:auto;
+  padding:4px 20px 20px
+}
+
+.amount-entry{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  padding:18px 0 8px
+}
+
+.dollar{
+  font-size:30px;
+  color:var(--sub);
+  margin-right:4px
+}
+
+.amount-input{
+  font-size:44px;
+  font-weight:600;
+  color:var(--ink);
+  border:0;
+  outline:0;
+  background:transparent;
+  width:180px
+}
+
+.text-input{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 14px;
+  font-size:15px;
+  outline:0;
+  margin-bottom:16px
+}
+
+.mini-label{
+  font-size:12px;
+  color:var(--sub);
+  margin-bottom:8px
+}
+
+.chips{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:6px;
+  margin-bottom:16px;
+  scrollbar-width:none
+}
+
+.chips::-webkit-scrollbar{
+  display:none
+}
+
+.chip{
+  flex:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:var(--card);
+  border:1px solid var(--line);
+  white-space:nowrap;
+  font-size:13px
+}
+
+.chip.active{
+  font-weight:600
+}
+
+.date-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px
+}
+
+.today{
+  font-size:12px;
+  color:var(--deep);
+  background:0;
+  border:0
+}
+
+.wheels{
+  display:flex;
+  justify-content:center;
+  gap:4px;
+  margin-top:4px
+}
+
+.wheel{
+  position:relative;
+  height:180px;
+  overflow:hidden;
+  width:90px;
+  touch-action:pan-y
+}
+
+.wheel.day{
+  width:64px
+}
+
+.wheel.year{
+  width:80px
+}
+
+.wheel-scroll{
+  height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:auto
+}
+
+.wheel-scroll::-webkit-scrollbar{
+  display:none
+}
+
+.wheel-pad{
+  height:72px;
+  flex:none
+}
+
+.wheel-item{
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  color:var(--ink);
+  will-change:transform,opacity;
+  user-select:none;
+  -webkit-user-select:none
+}
+
+.wheel-line{
+  position:absolute;
+  top:72px;
+  left:0;
+  right:0;
+  height:36px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  pointer-events:none
+}
+
+.save{
+  width:100%;
+  margin-top:20px;
+  padding:14px 0;
+  border:0;
+  border-radius:14px;
+  background:var(--accent);
+  color:#fff;
+  font-size:16px;
+  font-weight:600
+}
+
+.save:disabled{
+  background:var(--line);
+  color:var(--sub)
+}
+
+.delete{
+  width:100%;
+  margin-top:10px;
+  padding:12px 0;
+  border:0;
+  background:transparent;
+  color:#C0504D;
+  font-size:14px;
+  font-weight:600
+}
+
+@media(min-width:421px){
+  .fab{
+    right:calc((100vw - 420px)/2 + 20px)
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div id="app" class="app">
-  <div class="header"><div class="title">Expenses</div><div id="todayText" class="date"></div></div>
-  <div class="period-wrap"><div class="period"><button data-period="week">This week</button><button data-period="month" class="active">This month</button></div></div>
-  <div class="pad"><div class="card total"><div class="label">Spent this <span id="periodLabel">month</span></div><div id="grandTotal" class="total-num">$0.00</div></div></div>
-  <div class="pad"><div class="card chart-card"><div class="section-label">By category</div><div id="chartContent"></div></div></div>
+
+  <div class="header">
+    <div class="title">Expenses</div>
+    <div id="todayText" class="date"></div>
+  </div>
+
+  <div class="period-wrap">
+    <div class="period">
+      <button data-period="week">This week</button>
+      <button data-period="month" class="active">This month</button>
+    </div>
+  </div>
+
+  <div class="pad">
+    <div class="card total">
+      <div class="label">
+        Spent this <span id="periodLabel">month</span>
+      </div>
+      <div id="grandTotal" class="total-num">$0.00</div>
+    </div>
+  </div>
+
+  <div class="pad">
+    <div class="card chart-card">
+      <div class="section-label">By category</div>
+      <div id="chartContent"></div>
+    </div>
+  </div>
+
   <div id="list" class="list-wrap"></div>
+
   <button id="fab" class="fab" aria-label="Add expense">+</button>
+
 </div>
 
 <div id="overlay" class="overlay"></div>
+
 <div id="sheet" class="sheet">
+
   <div class="handle"></div>
-  <div class="sheet-head"><span id="sheetTitle">Add expense</span><button id="close" class="close">×</button></div>
+
+  <div class="sheet-head">
+    <span id="sheetTitle">Add expense</span>
+    <button id="close" class="close">×</button>
+  </div>
+
   <div class="sheet-body">
-    <div class="amount-entry"><span class="dollar">$</span><input id="amount" class="amount-input" inputmode="decimal" placeholder="0.00"></div>
-    <input id="description" class="text-input" placeholder="What was it for?">
-    <div class="mini-label">Category</div><div id="chips" class="chips"></div>
-    <div class="date-head"><span class="mini-label" style="margin:0">Date</span><button id="todayBtn" class="today">Today</button></div><div id="selectedDateText" style="text-align:center;color:var(--sub);font-size:13px;margin:-2px 0 8px"></div>
+
+    <div class="amount-entry">
+      <span class="dollar">$</span>
+      <input
+        id="amount"
+        class="amount-input"
+        inputmode="decimal"
+        placeholder="0.00"
+      >
+    </div>
+
+    <input
+      id="description"
+      class="text-input"
+      placeholder="What was it for?"
+    >
+
+    <div class="mini-label">Category</div>
+    <div id="chips" class="chips"></div>
+
+    <div class="date-head">
+      <span class="mini-label" style="margin:0">Date</span>
+      <button id="todayBtn" class="today">Today</button>
+    </div>
+
+    <div
+      id="selectedDateText"
+      style="text-align:center;color:var(--sub);font-size:13px;margin:-2px 0 8px"
+    ></div>
+
     <div id="wheels" class="wheels"></div>
-    <button id="save" class="save" disabled>Add expense</button>
-    <button id="delete" class="delete" style="display:none">Delete expense</button>
-</div>
+
+    <button id="save" class="save" disabled>
+      Add expense
+    </button>
+
+    <button
+      id="delete"
+      class="delete"
+      style="display:none"
+    >
+      Delete expense
+    </button>
+
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
 <script>
-const CATEGORIES=[
-{name:"Groceries",color:"#93C47D",icon:"🛒"},{name:"Transport",color:"#6FA8DC",icon:"🚗"},
-{name:"Eating Out",color:"#F6B26B",icon:"🍴"},{name:"Bills",color:"#B4A7D6",icon:"🧾"},
-{name:"Rent/Mortgage",color:"#C27BA0",icon:"⌂"},{name:"Shopping",color:"#E8C84A",icon:"🛍️"},
-{name:"Health",color:"#E06666",icon:"♥"},{name:"Entertainment",color:"#76A5AF",icon:"🎬"},
-{name:"Travel",color:"#6AA84F",icon:"✈️"},{name:"Drinks",color:"#8E7CC3",icon:"🥤"},{name:"Snacks",color:"#F1C232",icon:"🍿"},{name:"Other",color:"#A6A6A6",icon:"•••"}];
-const catByName=Object.fromEntries(CATEGORIES.map(c=>[c.name,c]));
-const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
-const seed=()=>{const d=new Date(),mk=(offset,category,description,amount)=>{const x=new Date(d);x.setDate(x.getDate()-offset);return{id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),date:`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`,category,description,amount}};return[mk(0,"Eating Out","Coffee with Sam",6.5),mk(1,"Transport","Petrol",45),mk(2,"Groceries","Coles weekly shop",84.5),mk(6,"Bills","Phone bill",55),mk(9,"Shopping","New sneakers",129)]};
-const fmt=n=>n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-const weekStart=d=>{const x=new Date(d),day=x.getDay(),diff=(day===0?-6:1)-day;x.setDate(x.getDate()+diff);x.setHours(0,0,0,0);return x.getTime()};
-const dayLabel=s=>{const d=new Date(s+"T00:00:00"),n=new Date(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate()),diff=Math.round((t-d)/86400000);if(diff===0)return"Today";if(diff===1)return"Yesterday";return d.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})};
+
+/* =========================================================
+   CATEGORIES
+   ========================================================= */
+
+const CATEGORIES = [
+  {name:"Groceries",color:"#93C47D",icon:"🛒"},
+  {name:"Transport",color:"#6FA8DC",icon:"🚗"},
+  {name:"Eating Out",color:"#F6B26B",icon:"🍴"},
+  {name:"Bills",color:"#B4A7D6",icon:"🧾"},
+  {name:"Rent/Mortgage",color:"#C27BA0",icon:"⌂"},
+  {name:"Shopping",color:"#E8C84A",icon:"🛍️"},
+  {name:"Health",color:"#E06666",icon:"♥"},
+  {name:"Entertainment",color:"#76A5AF",icon:"🎬"},
+  {name:"Travel",color:"#6AA84F",icon:"✈️"},
+  {name:"Drinks",color:"#8E7CC3",icon:"🥤"},
+  {name:"Snacks",color:"#F1C232",icon:"🍿"},
+  {name:"Other",color:"#A6A6A6",icon:"•••"}
+];
+
+const catByName =
+  Object.fromEntries(
+    CATEGORIES.map(c => [c.name,c])
+  );
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+
+const fmt = n =>
+  n.toLocaleString(undefined,{
+    minimumFractionDigits:2,
+    maximumFractionDigits:2
+  });
+
+const todayStr = () => {
+  const d = new Date();
+
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
+
+const weekStart = d => {
+  const x = new Date(d);
+  const day = x.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+
+  x.setDate(x.getDate() + diff);
+  x.setHours(0,0,0,0);
+
+  return x.getTime();
+};
+
+const dayLabel = s => {
+  const d = new Date(s+"T00:00:00");
+  const n = new Date();
+
+  const t = new Date(
+    n.getFullYear(),
+    n.getMonth(),
+    n.getDate()
+  );
+
+  const diff =
+    Math.round((t-d)/86400000);
+
+  if(diff === 0) return "Today";
+  if(diff === 1) return "Yesterday";
+
+  return d.toLocaleDateString(
+    undefined,
+    {
+      weekday:"short",
+      day:"numeric",
+      month:"short"
+    }
+  );
+};
+
+
+/* =========================================================
+   SEED DATA
+   ========================================================= */
+
+const seed = () => {
+
+  const d = new Date();
+
+  const mk = (
+    offset,
+    category,
+    description,
+    amount
+  ) => {
+
+    const x = new Date(d);
+
+    x.setDate(
+      x.getDate() - offset
+    );
+
+    return {
+      id:
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : Date.now()+Math.random(),
+
+      date:
+        `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`,
+
+      category,
+      description,
+      amount
+    };
+  };
+
+  return [
+    mk(0,"Eating Out","Coffee with Sam",6.5),
+    mk(1,"Transport","Petrol",45),
+    mk(2,"Groceries","Coles weekly shop",84.5),
+    mk(6,"Bills","Phone bill",55),
+    mk(9,"Shopping","New sneakers",129)
+  ];
+};
+
+
+/* =========================================================
+   LOCAL STORAGE
+   ========================================================= */
+
 let transactions;
-try { transactions=JSON.parse(localStorage.getItem("expenses")||"null"); } catch(e) { transactions=null; }
-if(!Array.isArray(transactions)){transactions=seed();saveData();}
-function saveData(){localStorage.setItem("expenses",JSON.stringify(transactions))}
-let period="month",editing=null,chart=null,dateVal={};const $=id=>document.getElementById(id);
-$("todayText").textContent=new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
+
+try{
+  transactions =
+    JSON.parse(
+      localStorage.getItem("expenses") || "null"
+    );
+}catch(e){
+  transactions = null;
+}
+
+if(!Array.isArray(transactions)){
+  transactions = seed();
+  saveData();
+}
+
+function saveData(){
+  localStorage.setItem(
+    "expenses",
+    JSON.stringify(transactions)
+  );
+}
+
+
+/* =========================================================
+   APP STATE
+   ========================================================= */
+
+let period = "month";
+let editing = null;
+let chart = null;
+
+let dateVal = {};
+
+$("todayText").textContent =
+  new Date().toLocaleDateString(
+    undefined,
+    {
+      weekday:"long",
+      day:"numeric",
+      month:"long"
+    }
+  );
+
+
+/* =========================================================
+   MAIN RENDER
+   ========================================================= */
 
 function render(){
- const now=new Date(),ws=weekStart(now);
- const filtered=transactions.filter(t=>{const d=new Date(t.date+"T00:00:00");return period==="week"?weekStart(d)===ws:d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()});
- const total=filtered.reduce((s,t)=>s+t.amount,0);$("grandTotal").textContent="$"+fmt(total);$("periodLabel").textContent=period;
- const totals=CATEGORIES.map(c=>({...c,total:filtered.filter(t=>t.category===c.name).reduce((s,t)=>s+t.amount,0)})).filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
- renderChart(totals,total);renderList(filtered);
- document.querySelectorAll("[data-period]").forEach(b=>b.classList.toggle("active",b.dataset.period===period));
-}
-function renderChart(totals,total){
- const el=$("chartContent");if(chart){chart.destroy();chart=null}
- if(!total){el.innerHTML='<div class="empty">No expenses in this period yet</div>';return}
- el.innerHTML='<div class="chart-area"><canvas id="donut"></canvas><div class="chart-center"><small>Total</small><strong>$'+fmt(total)+'</strong></div></div><div id="legend" class="legend"></div>';
- chart=new Chart($("donut"),{type:"doughnut",data:{labels:totals.map(x=>x.name),datasets:[{data:totals.map(x=>x.total),backgroundColor:totals.map(x=>x.color),borderWidth:0,spacing:2}]},options:{responsive:false,cutout:"61%",plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` $${fmt(c.raw)}`}}}}});
- $("legend").innerHTML=totals.map(t=>`<div class="legend-row"><span class="dot" style="background:${t.color}"></span><span class="cat-name">${t.name}</span><span class="pct">${Math.round(t.total/total*100)}%</span><span class="amount">$${fmt(t.total)}</span></div>`).join("");
-}
-function renderList(filtered){
- const sorted=[...filtered].sort((a,b)=>b.date.localeCompare(a.date));let groups=[];let last=null;
- sorted.forEach(t=>{const l=dayLabel(t.date);if(l!==last){groups.push({label:l,items:[]});last=l}groups.at(-1).items.push(t)});
- $("list").innerHTML=groups.length?groups.map(g=>`<div class="day-group"><div class="day-label">${g.label}</div><div class="tx-card">${g.items.map(t=>{const c=catByName[t.category]||catByName.Other;return`<div class="tx" data-id="${t.id}"><div class="icon-box" style="background:${c.color}22">${c.icon}</div><div class="tx-main"><div class="desc">${esc(t.description)}</div><div class="cat">${esc(t.category)}</div></div><div class="tx-amount">$${fmt(t.amount)}</div><span class="chev">›</span></div>`}).join("")}</div></div>`).join(""):`<div class="card empty">Nothing logged this ${period} yet. Tap + to add your first expense.</div>`;
- document.querySelectorAll(".tx").forEach(x=>x.onclick=()=>openSheet(transactions.find(t=>String(t.id)===x.dataset.id)));
-}
-function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 
-function initDate(d=new Date()){dateVal={year:d.getFullYear(),month:d.getMonth(),day:d.getDate()}}
-function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
+  const now = new Date();
+  const ws = weekStart(now);
+
+  const filtered =
+    transactions.filter(t => {
+
+      const d =
+        new Date(
+          t.date+"T00:00:00"
+        );
+
+      if(period === "week"){
+        return weekStart(d) === ws;
+      }
+
+      return (
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth()
+      );
+    });
+
+  const total =
+    filtered.reduce(
+      (s,t) => s+t.amount,
+      0
+    );
+
+  $("grandTotal").textContent =
+    "$"+fmt(total);
+
+  $("periodLabel").textContent =
+    period;
+
+  const totals =
+    CATEGORIES
+      .map(c => ({
+        ...c,
+        total:
+          filtered
+            .filter(t => t.category === c.name)
+            .reduce(
+              (s,t) => s+t.amount,
+              0
+            )
+      }))
+      .filter(c => c.total > 0)
+      .sort((a,b) => b.total-a.total);
+
+  renderChart(totals,total);
+  renderList(filtered);
+
+  document
+    .querySelectorAll("[data-period]")
+    .forEach(b => {
+      b.classList.toggle(
+        "active",
+        b.dataset.period === period
+      );
+    });
+}
+
+
+/* =========================================================
+   CHART
+   ========================================================= */
+
+function renderChart(totals,total){
+
+  const el = $("chartContent");
+
+  if(chart){
+    chart.destroy();
+    chart = null;
+  }
+
+  if(!total){
+    el.innerHTML =
+      '<div class="empty">No expenses in this period yet</div>';
+
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="chart-area">
+      <canvas id="donut"></canvas>
+
+      <div class="chart-center">
+        <small>Total</small>
+        <strong>$${fmt(total)}</strong>
+      </div>
+    </div>
+
+    <div id="legend" class="legend"></div>
+  `;
+
+  chart =
+    new Chart(
+      $("donut"),
+      {
+        type:"doughnut",
+
+        data:{
+          labels:totals.map(x => x.name),
+
+          datasets:[{
+            data:totals.map(x => x.total),
+            backgroundColor:totals.map(x => x.color),
+            borderWidth:0,
+            spacing:2
+          }]
+        },
+
+        options:{
+          responsive:false,
+          cutout:"61%",
+
+          plugins:{
+            legend:{
+              display:false
+            },
+
+            tooltip:{
+              callbacks:{
+                label:c =>
+                  ` $${fmt(c.raw)}`
+              }
+            }
+          }
+        }
+      }
+    );
+
+  $("legend").innerHTML =
+    totals.map(t => `
+      <div class="legend-row">
+
+        <span
+          class="dot"
+          style="background:${t.color}"
+        ></span>
+
+        <span class="cat-name">
+          ${t.name}
+        </span>
+
+        <span class="pct">
+          ${Math.round(t.total/total*100)}%
+        </span>
+
+        <span class="amount">
+          $${fmt(t.total)}
+        </span>
+
+      </div>
+    `).join("");
+}
+
+
+/* =========================================================
+   TRANSACTION LIST
+   ========================================================= */
+
+function renderList(filtered){
+
+  const sorted =
+    [...filtered].sort(
+      (a,b) =>
+        b.date.localeCompare(a.date)
+    );
+
+  let groups = [];
+  let last = null;
+
+  sorted.forEach(t => {
+
+    const l = dayLabel(t.date);
+
+    if(l !== last){
+      groups.push({
+        label:l,
+        items:[]
+      });
+
+      last = l;
+    }
+
+    groups.at(-1).items.push(t);
+  });
+
+  $("list").innerHTML =
+    groups.length
+      ? groups.map(g => `
+          <div class="day-group">
+
+            <div class="day-label">
+              ${g.label}
+            </div>
+
+            <div class="tx-card">
+
+              ${g.items.map(t => {
+
+                const c =
+                  catByName[t.category] ||
+                  catByName.Other;
+
+                return `
+                  <div
+                    class="tx"
+                    data-id="${t.id}"
+                  >
+
+                    <div
+                      class="icon-box"
+                      style="background:${c.color}22"
+                    >
+                      ${c.icon}
+                    </div>
+
+                    <div class="tx-main">
+
+                      <div class="desc">
+                        ${esc(t.description)}
+                      </div>
+
+                      <div class="cat">
+                        ${esc(t.category)}
+                      </div>
+
+                    </div>
+
+                    <div class="tx-amount">
+                      $${fmt(t.amount)}
+                    </div>
+
+                    <span class="chev">
+                      ›
+                    </span>
+
+                  </div>
+                `;
+              }).join("")}
+
+            </div>
+          </div>
+        `).join("")
+
+      : `
+        <div class="card empty">
+          Nothing logged this ${period} yet.
+          Tap + to add your first expense.
+        </div>
+      `;
+
+  document
+    .querySelectorAll(".tx")
+    .forEach(x => {
+
+      x.onclick = () => {
+
+        openSheet(
+          transactions.find(
+            t => String(t.id) === x.dataset.id
+          )
+        );
+
+      };
+
+    });
+}
+
+function esc(s){
+
+  return String(s).replace(
+    /[&<>"']/g,
+    m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[m])
+  );
+}
+
+
+/* =========================================================
+   DATE STATE
+   ========================================================= */
+
+function initDate(d = new Date()){
+
+  dateVal = {
+    year:d.getFullYear(),
+    month:d.getMonth(),
+    day:d.getDate()
+  };
+}
+
+function daysInMonth(y,m){
+
+  return new Date(
+    y,
+    m+1,
+    0
+  ).getDate();
+}
+
 function updateSelectedDate(){
- const d=new Date(dateVal.year,dateVal.month,dateVal.day);
- $("selectedDateText").textContent=d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
- const t=new Date(); const isToday=dateVal.year===t.getFullYear()&&dateVal.month===t.getMonth()&&dateVal.day===t.getDate();
- $("todayBtn").textContent=isToday?"Today · "+t.toLocaleDateString(undefined,{day:"numeric",month:"short"}):"Today";
+
+  const d =
+    new Date(
+      dateVal.year,
+      dateVal.month,
+      dateVal.day
+    );
+
+  $("selectedDateText").textContent =
+    d.toLocaleDateString(
+      undefined,
+      {
+        weekday:"long",
+        day:"numeric",
+        month:"long",
+        year:"numeric"
+      }
+    );
+
+  const now = new Date();
+
+  const isToday =
+    dateVal.year === now.getFullYear() &&
+    dateVal.month === now.getMonth() &&
+    dateVal.day === now.getDate();
+
+  $("todayBtn").textContent =
+    isToday
+      ? "Today · " +
+        now.toLocaleDateString(
+          undefined,
+          {
+            day:"numeric",
+            month:"short"
+          }
+        )
+      : "Today";
 }
-let wheelState={};
+
+
+/* =========================================================
+   DATE WHEEL ENGINE
+   ========================================================= */
+
+const WHEEL_HEIGHT = 36;
+const SETTLE_DELAY = 100;
+const SNAP_DURATION = 280;
+
+let wheelState = {};
+
+
+function monthItems(){
+
+  return [
+    "Jan","Feb","Mar","Apr",
+    "May","Jun","Jul","Aug",
+    "Sep","Oct","Nov","Dec"
+  ].map(
+    (label,value) => ({
+      label,
+      value
+    })
+  );
+}
+
+
+function dayItems(){
+
+  return Array.from(
+    {
+      length:
+        daysInMonth(
+          dateVal.year,
+          dateVal.month
+        )
+    },
+    (_,i) => ({
+      label:String(i+1),
+      value:i+1
+    })
+  );
+}
+
+
+function yearItems(){
+
+  const currentYear =
+    new Date().getFullYear();
+
+  const min =
+    Math.min(
+      currentYear - 10,
+      dateVal.year - 2
+    );
+
+  const max =
+    Math.max(
+      currentYear + 10,
+      dateVal.year + 2
+    );
+
+  return Array.from(
+    {
+      length:max-min+1
+    },
+    (_,i) => ({
+      label:String(min+i),
+      value:min+i
+    })
+  );
+}
+
+
+function indexForValue(items,value){
+
+  const index =
+    items.findIndex(
+      item => item.value === value
+    );
+
+  return index >= 0 ? index : 0;
+}
+
+
+/*
+ * Creates the visual depth effect.
+ * This does NOT change the selected date.
+ */
 function updateWheelVisual(sc){
- const center=sc.scrollTop/36;
- [...sc.querySelectorAll(".wheel-item")].forEach((el,i)=>{
-  const dist=Math.abs(i-center); el.style.opacity=Math.max(.2,1-dist*.38); el.style.transform=`scale(${Math.max(.80,1-dist*.14)})`; el.style.fontWeight=dist<.35?600:400;
- });
+
+  const center =
+    sc.scrollTop / WHEEL_HEIGHT;
+
+  sc.querySelectorAll(".wheel-item")
+    .forEach((item,index) => {
+
+      const distance =
+        Math.abs(index-center);
+
+      item.style.opacity =
+        Math.max(
+          0.2,
+          1-distance*0.34
+        );
+
+      item.style.transform =
+        `scale(${Math.max(
+          0.82,
+          1-distance*0.11
+        )})`;
+
+      item.style.fontWeight =
+        distance < 0.4
+          ? "600"
+          : "400";
+    });
 }
-function buildWheel(type,items,value){
- const wrap=document.createElement("div");wrap.className="wheel "+type;
- const sc=document.createElement("div");sc.className="wheel-scroll";
- const pad=document.createElement("div");pad.className="wheel-pad";sc.appendChild(pad);
- items.forEach((it,i)=>{const row=document.createElement("div");row.className="wheel-item";row.textContent=it.label;row.dataset.value=it.value;row.addEventListener("click",()=>snapWheel(type,i));sc.appendChild(row)});
- sc.appendChild(pad.cloneNode());wrap.appendChild(sc);
- const line=document.createElement("div");line.className="wheel-line";wrap.appendChild(line);
- wheelState[type]={sc,items,index:Math.max(0,items.findIndex(x=>x.value===value)),timer:null};
- requestAnimationFrame(()=>{sc.scrollTop=wheelState[type].index*36;updateWheelVisual(sc)});
- sc.addEventListener("scroll",()=>{
-  updateWheelVisual(sc); const st=wheelState[type]; clearTimeout(st.timer);
-  st.timer=setTimeout(()=>{const i=Math.max(0,Math.min(st.items.length-1,Math.round(sc.scrollTop/36)));snapWheel(type,i,true)},100);
- },{passive:true});
- return wrap;
+
+
+function createWheelItem(
+  type,
+  item,
+  index
+){
+
+  const row =
+    document.createElement("div");
+
+  row.className =
+    "wheel-item";
+
+  row.textContent =
+    item.label;
+
+  row.dataset.value =
+    item.value;
+
+  /*
+   * Tapping an item snaps to it.
+   */
+  row.addEventListener(
+    "click",
+    () => snapWheel(type,index)
+  );
+
+  return row;
 }
-function snapWheel(type,index,animated=false){
- const st=wheelState[type];if(!st)return; index=Math.max(0,Math.min(st.items.length-1,index));st.index=index;
- st.sc.scrollTo({top:index*36,behavior:animated?"smooth":"auto"}); updateWheelVisual(st.sc);
- clearTimeout(st.timer); st.timer=setTimeout(()=>applyWheel(type,index),animated?220:0);
+
+
+/*
+ * Builds ONE independent scroll container.
+ */
+function buildWheel(
+  type,
+  items,
+  selectedValue
+){
+
+  const wrap =
+    document.createElement("div");
+
+  wrap.className =
+    "wheel "+type;
+
+
+  const sc =
+    document.createElement("div");
+
+  sc.className =
+    "wheel-scroll";
+
+
+  const topPad =
+    document.createElement("div");
+
+  topPad.className =
+    "wheel-pad";
+
+  sc.appendChild(topPad);
+
+
+  items.forEach(
+    (item,index) => {
+
+      sc.appendChild(
+        createWheelItem(
+          type,
+          item,
+          index
+        )
+      );
+
+    }
+  );
+
+
+  const bottomPad =
+    document.createElement("div");
+
+  bottomPad.className =
+    "wheel-pad";
+
+  sc.appendChild(bottomPad);
+
+
+  const line =
+    document.createElement("div");
+
+  line.className =
+    "wheel-line";
+
+
+  wrap.appendChild(sc);
+  wrap.appendChild(line);
+
+
+  const selectedIndex =
+    indexForValue(
+      items,
+      selectedValue
+    );
+
+
+  const state = {
+
+    type,
+    sc,
+    items,
+
+    index:selectedIndex,
+
+    settling:false,
+
+    settleTimer:null,
+
+    snapTimer:null
+
+  };
+
+
+  wheelState[type] =
+    state;
+
+
+  /*
+   * Set initial position after layout.
+   */
+  requestAnimationFrame(() => {
+
+    sc.scrollTop =
+      selectedIndex *
+      WHEEL_HEIGHT;
+
+    updateWheelVisual(sc);
+
+  });
+
+
+  /*
+   * The important part:
+   *
+   * scrolling does NOT update the date.
+   *
+   * We simply wait until scrolling stops.
+   */
+  sc.addEventListener(
+    "scroll",
+    () => {
+
+      updateWheelVisual(sc);
+
+      if(state.settling){
+        return;
+      }
+
+      clearTimeout(
+        state.settleTimer
+      );
+
+      state.settleTimer =
+        setTimeout(
+          () => finishWheelScroll(type),
+          SETTLE_DELAY
+        );
+
+    },
+    {
+      passive:true
+    }
+  );
+
+
+  return wrap;
 }
-function applyWheel(type,index){
- const st=wheelState[type]; if(!st || st.index!==index)return;
- const value=st.items[index].value;
- if(type==="month")dateVal.month=value;
- else if(type==="day")dateVal.day=value;
- else dateVal.year=value;
- dateVal.day=Math.min(dateVal.day,daysInMonth(dateVal.year,dateVal.month));
- updateSelectedDate();
- if(type!=="day")renderWheels();
+
+
+/*
+ * Called once scrolling has stopped.
+ */
+function finishWheelScroll(type){
+
+  const state =
+    wheelState[type];
+
+  if(
+    !state ||
+    state.settling
+  ){
+    return;
+  }
+
+
+  const rawIndex =
+    state.sc.scrollTop /
+    WHEEL_HEIGHT;
+
+
+  const index =
+    Math.max(
+      0,
+      Math.min(
+        state.items.length-1,
+        Math.round(rawIndex)
+      )
+    );
+
+
+  /*
+   * Already perfectly aligned.
+   */
+  if(
+    Math.abs(
+      state.sc.scrollTop -
+      index*WHEEL_HEIGHT
+    ) < 0.5
+  ){
+
+    commitWheel(
+      type,
+      index
+    );
+
+    return;
+  }
+
+
+  snapWheel(
+    type,
+    index
+  );
 }
+
+
+/*
+ * Performs ONE snap.
+ */
+function snapWheel(
+  type,
+  index
+){
+
+  const state =
+    wheelState[type];
+
+  if(!state){
+    return;
+  }
+
+
+  clearTimeout(
+    state.settleTimer
+  );
+
+  clearTimeout(
+    state.snapTimer
+  );
+
+
+  index =
+    Math.max(
+      0,
+      Math.min(
+        state.items.length-1,
+        index
+      )
+    );
+
+
+  state.index =
+    index;
+
+  state.settling =
+    true;
+
+
+  /*
+   * Only one animation.
+   */
+  state.sc.scrollTo({
+    top:index*WHEEL_HEIGHT,
+    behavior:"smooth"
+  });
+
+
+  /*
+   * Wait for the snap before committing
+   * the date.
+   */
+  state.snapTimer =
+    setTimeout(() => {
+
+      state.sc.scrollTop =
+        index*WHEEL_HEIGHT;
+
+      updateWheelVisual(
+        state.sc
+      );
+
+      state.settling =
+        false;
+
+      /*
+       * NOW update the actual date.
+       */
+      commitWheel(
+        type,
+        index
+      );
+
+    },SNAP_DURATION);
+}
+
+
+/*
+ * Updates date ONLY after wheel settles.
+ */
+function commitWheel(
+  type,
+  index
+){
+
+  const state =
+    wheelState[type];
+
+  if(!state){
+    return;
+  }
+
+
+  const item =
+    state.items[index];
+
+  if(!item){
+    return;
+  }
+
+
+  if(type === "month"){
+    dateVal.month =
+      item.value;
+  }
+
+  if(type === "day"){
+    dateVal.day =
+      item.value;
+  }
+
+  if(type === "year"){
+    dateVal.year =
+      item.value;
+  }
+
+
+  /*
+   * Protect against invalid dates such as
+   * February 31.
+   */
+  const maxDay =
+    daysInMonth(
+      dateVal.year,
+      dateVal.month
+    );
+
+  if(dateVal.day > maxDay){
+    dateVal.day = maxDay;
+  }
+
+
+  updateSelectedDate();
+
+
+  /*
+   * Only the dependent day wheel changes.
+   *
+   * The wheel the user is currently touching
+   * is NEVER rebuilt here.
+   */
+  if(
+    type === "month" ||
+    type === "year"
+  ){
+
+    updateDayWheel();
+
+  }
+}
+
+
+/*
+ * Updates the day wheel without rebuilding
+ * month or year.
+ */
+function updateDayWheel(){
+
+  const state =
+    wheelState.day;
+
+  if(!state){
+    return;
+  }
+
+
+  const items =
+    dayItems();
+
+
+  const maxDay =
+    daysInMonth(
+      dateVal.year,
+      dateVal.month
+    );
+
+
+  if(dateVal.day > maxDay){
+    dateVal.day = maxDay;
+  }
+
+
+  /*
+   * If the number of days hasn't changed,
+   * there is literally nothing to rebuild.
+   */
+  if(
+    state.items.length ===
+    items.length
+  ){
+
+    updateSelectedDate();
+
+    return;
+  }
+
+
+  clearTimeout(
+    state.settleTimer
+  );
+
+  clearTimeout(
+    state.snapTimer
+  );
+
+
+  const fragment =
+    document.createDocumentFragment();
+
+
+  const topPad =
+    document.createElement("div");
+
+  topPad.className =
+    "wheel-pad";
+
+  fragment.appendChild(
+    topPad
+  );
+
+
+  items.forEach(
+    (item,index) => {
+
+      fragment.appendChild(
+        createWheelItem(
+          "day",
+          item,
+          index
+        )
+      );
+
+    }
+  );
+
+
+  const bottomPad =
+    document.createElement("div");
+
+  bottomPad.className =
+    "wheel-pad";
+
+  fragment.appendChild(
+    bottomPad
+  );
+
+
+  /*
+   * Replace ONLY the contents of
+   * the day wheel.
+   */
+  state.sc.replaceChildren(
+    fragment
+  );
+
+
+  state.items =
+    items;
+
+
+  state.index =
+    indexForValue(
+      items,
+      dateVal.day
+    );
+
+
+  /*
+   * Keep the selected day in place.
+   */
+  state.sc.scrollTop =
+    state.index *
+    WHEEL_HEIGHT;
+
+
+  updateWheelVisual(
+    state.sc
+  );
+
+  updateSelectedDate();
+}
+
+
+/*
+ * Initial wheel render.
+ */
 function renderWheels(){
- updateSelectedDate(); const container=$("wheels");container.innerHTML="";wheelState={};
- const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((label,value)=>({label,value}));
- const days=Array.from({length:daysInMonth(dateVal.year,dateVal.month)},(_,i)=>({label:String(i+1),value:i+1}));
- const cy=new Date().getFullYear(), min=Math.min(cy-10,dateVal.year-2), max=Math.max(cy+10,dateVal.year+2);
- const years=Array.from({length:max-min+1},(_,i)=>({label:String(min+i),value:min+i}));
- container.appendChild(buildWheel("month",months,dateVal.month));
- container.appendChild(buildWheel("day",days,dateVal.day));
- container.appendChild(buildWheel("year",years,dateVal.year));
+
+  updateSelectedDate();
+
+  const container =
+    $("wheels");
+
+  container.innerHTML = "";
+
+  wheelState = {};
+
+
+  /*
+   * Three independent wheels.
+   */
+  container.appendChild(
+    buildWheel(
+      "month",
+      monthItems(),
+      dateVal.month
+    )
+  );
+
+
+  container.appendChild(
+    buildWheel(
+      "day",
+      dayItems(),
+      dateVal.day
+    )
+  );
+
+
+  container.appendChild(
+    buildWheel(
+      "year",
+      yearItems(),
+      dateVal.year
+    )
+  );
 }
+
+
+/* =========================================================
+   EXPENSE SHEET
+   ========================================================= */
+
 function openSheet(tx=null){
- editing=tx||null;initDate();
- if(tx){const [y,m,d]=tx.date.split("-").map(Number);dateVal={year:y,month:m-1,day:d};$("amount").value=tx.amount;$("description").value=tx.description;$("sheetTitle").textContent="Edit expense";$("save").textContent="Save changes";$("delete").style.display="block"}else{$("amount").value="";$("description").value="";$("sheetTitle").textContent="Add expense";$("save").textContent="Add expense";$("delete").style.display="none"}
- renderChips(tx?tx.category:"Groceries");renderWheels();updateSave();$("overlay").classList.add("open");$("sheet").classList.add("open");setTimeout(()=>$("amount").focus(),200)
+
+  editing =
+    tx || null;
+
+  initDate();
+
+
+  if(tx){
+
+    const [
+      y,
+      m,
+      d
+    ] =
+      tx.date
+        .split("-")
+        .map(Number);
+
+
+    dateVal = {
+      year:y,
+      month:m-1,
+      day:d
+    };
+
+
+    $("amount").value =
+      tx.amount;
+
+    $("description").value =
+      tx.description;
+
+    $("sheetTitle").textContent =
+      "Edit expense";
+
+    $("save").textContent =
+      "Save changes";
+
+    $("delete").style.display =
+      "block";
+
+  }else{
+
+    $("amount").value =
+      "";
+
+    $("description").value =
+      "";
+
+    $("sheetTitle").textContent =
+      "Add expense";
+
+    $("save").textContent =
+      "Add expense";
+
+    $("delete").style.display =
+      "none";
+  }
+
+
+  renderChips(
+    tx
+      ? tx.category
+      : "Groceries"
+  );
+
+  renderWheels();
+
+  updateSave();
+
+
+  $("overlay").classList.add(
+    "open"
+  );
+
+  $("sheet").classList.add(
+    "open"
+  );
+
+
+  setTimeout(
+    () => $("amount").focus(),
+    200
+  );
 }
-function closeSheet(){$("overlay").classList.remove("open");$("sheet").classList.remove("open");editing=null}
-function renderChips(active){$("chips").innerHTML=CATEGORIES.map(c=>`<button class="chip ${c.name===active?"active":""}" data-cat="${c.name}" style="${c.name===active?`border-color:${c.color};background:${c.color}22`:``}"><span>${c.icon}</span>${c.name}</button>`).join("");document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{renderChips(b.dataset.cat);$("chips").dataset.selected=b.dataset.cat}) ;$("chips").dataset.selected=active}
-function updateSave(){const n=parseFloat($("amount").value);$("save").disabled=!(n>0)}
-$("amount").addEventListener("input",e=>{e.target.value=e.target.value.replace(/[^0-9.]/g,"");updateSave()});
-$("save").onclick=()=>{const amount=parseFloat($("amount").value);if(!(amount>0))return;const d=`${dateVal.year}-${String(dateVal.month+1).padStart(2,"0")}-${String(dateVal.day).padStart(2,"0")}`,cat=$("chips").dataset.selected||"Groceries",description=$("description").value.trim()||cat;
- if(editing){transactions=transactions.map(t=>t.id===editing.id?{...editing,date:d,category:cat,description,amount}:t)}else{transactions.unshift({id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),date:d,category:cat,description,amount})}
- saveData();closeSheet();render()};
-$("delete").onclick=()=>{if(editing&&confirm("Delete this expense?")){transactions=transactions.filter(t=>t.id!==editing.id);saveData();closeSheet();render()}};
-$("fab").onclick=()=>openSheet();$("close").onclick=closeSheet;$("overlay").onclick=closeSheet;$("todayBtn").onclick=()=>{initDate();renderWheels()};
-document.querySelectorAll("[data-period]").forEach(b=>b.onclick=()=>{period=b.dataset.period;render()});
+
+
+function closeSheet(){
+
+  $("overlay").classList.remove(
+    "open"
+  );
+
+  $("sheet").classList.remove(
+    "open"
+  );
+
+  editing = null;
+
+  wheelState = {};
+}
+
+
+/* =========================================================
+   CATEGORY CHIPS
+   ========================================================= */
+
+function renderChips(active){
+
+  $("chips").innerHTML =
+    CATEGORIES.map(c => `
+      <button
+        class="chip ${c.name===active?"active":""}"
+        data-cat="${c.name}"
+        style="${
+          c.name===active
+            ? `border-color:${c.color};background:${c.color}22`
+            : ""
+        }"
+      >
+        <span>${c.icon}</span>
+        ${c.name}
+      </button>
+    `).join("");
+
+
+  document
+    .querySelectorAll(".chip")
+    .forEach(b => {
+
+      b.onclick = () => {
+
+        renderChips(
+          b.dataset.cat
+        );
+
+        $("chips").dataset.selected =
+          b.dataset.cat;
+      };
+
+    });
+
+
+  $("chips").dataset.selected =
+    active;
+}
+
+
+/* =========================================================
+   SAVE / DELETE
+   ========================================================= */
+
+function updateSave(){
+
+  const n =
+    parseFloat(
+      $("amount").value
+    );
+
+  $("save").disabled =
+    !(n > 0);
+}
+
+
+$("amount").addEventListener(
+  "input",
+  e => {
+
+    e.target.value =
+      e.target.value.replace(
+        /[^0-9.]/g,
+        ""
+      );
+
+    updateSave();
+  }
+);
+
+
+$("save").onclick = () => {
+
+  const amount =
+    parseFloat(
+      $("amount").value
+    );
+
+  if(!(amount > 0)){
+    return;
+  }
+
+
+  const d =
+    `${dateVal.year}-${String(dateVal.month+1).padStart(2,"0")}-${String(dateVal.day).padStart(2,"0")}`;
+
+
+  const cat =
+    $("chips").dataset.selected ||
+    "Groceries";
+
+
+  const description =
+    $("description").value.trim() ||
+    cat;
+
+
+  if(editing){
+
+    transactions =
+      transactions.map(
+        t =>
+          t.id === editing.id
+            ? {
+                ...editing,
+                date:d,
+                category:cat,
+                description,
+                amount
+              }
+            : t
+      );
+
+  }else{
+
+    transactions.unshift({
+      id:
+        crypto.randomUUID
+          ? crypto.randomUUID()
+          : Date.now()+Math.random(),
+
+      date:d,
+      category:cat,
+      description,
+      amount
+    });
+
+  }
+
+
+  saveData();
+
+  closeSheet();
+
+  render();
+};
+
+
+$("delete").onclick = () => {
+
+  if(
+    editing &&
+    confirm(
+      "Delete this expense?"
+    )
+  ){
+
+    transactions =
+      transactions.filter(
+        t => t.id !== editing.id
+      );
+
+    saveData();
+
+    closeSheet();
+
+    render();
+  }
+};
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+$("fab").onclick =
+  () => openSheet();
+
+
+$("close").onclick =
+  closeSheet;
+
+
+$("overlay").onclick =
+  closeSheet;
+
+
+/*
+ * TODAY
+ *
+ * This intentionally works independently
+ * from wheel scrolling.
+ */
+$("todayBtn").onclick = () => {
+
+  const now = new Date();
+
+  initDate(now);
+
+  renderWheels();
+
+  updateSelectedDate();
+};
+
+
+document
+  .querySelectorAll("[data-period]")
+  .forEach(b => {
+
+    b.onclick = () => {
+
+      period =
+        b.dataset.period;
+
+      render();
+    };
+
+  });
+
+
+/* =========================================================
+   START APP
+   ========================================================= */
+
 render();
+
 </script>
+
 </body>
 </html>
